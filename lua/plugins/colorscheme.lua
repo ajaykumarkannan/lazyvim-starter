@@ -7,7 +7,9 @@ return {
       require("nightfox").setup({
         palettes = {
           carbonfox = {
-            fg1 = "#c8cacc", -- softer foreground (default is #f2f4f8)
+            -- Soften the default fg (#f2f4f8) to reduce contrast
+            -- Using fg2 level brightness (~24 steps darker than fg1)
+            fg1 = "#c8c8cb",
           },
         },
         options = {
