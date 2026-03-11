@@ -18,6 +18,21 @@ return {
     -- see below for full list of optional dependencies 👇
   },
   opts = {
+    mappings = {
+      ["gf"] = {
+        action = function()
+          return require("obsidian").util.gf_passthrough()
+        end,
+        opts = { noremap = false, expr = true, buffer = true },
+      },
+      ["<leader>ot"] = {
+        action = function()
+          return "<cmd>ObsidianToggleCheckbox<CR>"
+        end,
+        opts = { buffer = true, expr = true, desc = "Obsidian: Toggle checkbox" },
+      },
+      -- Disable the default <CR> mapping to prevent accidental toggling
+    },
     workspaces = {
       {
         name = "work",
