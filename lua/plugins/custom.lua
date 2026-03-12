@@ -1,5 +1,24 @@
 -- Custom plugins migrated from .vimrc
 return {
+  -- Remove time/clock from the status bar
+  {
+    "nvim-lualine/lualine.nvim",
+    opts = function(_, opts)
+      opts.sections = opts.sections or {}
+      -- Shorten mode names to single letters
+      opts.sections.lualine_a = {
+        {
+          "mode",
+          fmt = function(str)
+            return str:sub(1, 1)
+          end,
+        },
+      }
+      -- Remove time/clock
+      opts.sections.lualine_z = {}
+    end,
+  },
+
   -- LLVM and TableGen syntax highlighting
   {
     "rhysd/vim-llvm",
