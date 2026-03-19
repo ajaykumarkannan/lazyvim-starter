@@ -9,23 +9,38 @@
 
 -- Obsidian vault sync: auto-reload and auto-save for vault notes so that
 -- edits in the Obsidian app and Neovim stay in sync.
+--
+-- Uses the new obsidian-nvim/obsidian.nvim User autocmd events
+-- (ObsidianNoteEnter / ObsidianNoteLeave) to track whether the current
+-- buffer belongs to the vault, avoiding repeated get_client() calls.
+
 local obsidian_sync = vim.api.nvim_create_augroup("ObsidianSync", { clear = true })
 
---- Check if the current buffer is a note inside an obsidian.nvim workspace.
-local function is_obsidian_note()
-  local ok, client = pcall(require("obsidian").get_client)
-  if not ok or not client then
-    return false
-  end
-  return client:path_is_note(vim.api.nvim_buf_get_name(0))
-end
+-- Track which buffers are obsidian notes via the plugin's own events.
+local obsidian_bufs = {}
+
+vim.api.nvim_create_autocmd("User", {
+  group = obsidian_sync,
+  pattern = "ObsidianNoteEnter",
+  callback = function(ev)
+    obsidian_bufs[ev.buf] = true
+  end,
+})
+
+vim.api.nvim_create_autocmd("User", {
+  group = obsidian_sync,
+  pattern = "ObsidianNoteLeave",
+  callback = function(ev)
+    obsidian_bufs[ev.buf] = nil
+  end,
+})
 
 -- Reload buffer when the file changes on disk (e.g. saved by Obsidian app).
 vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold" }, {
   group = obsidian_sync,
   pattern = "*.md",
   callback = function()
-    if is_obsidian_note() then
+    if obsidian_bufs[vim.api.nvim_get_current_buf()] then
       vim.cmd("checktime")
     end
   end,
@@ -36,7 +51,8 @@ vim.api.nvim_create_autocmd({ "FocusLost", "BufLeave", "InsertLeave", "TextChang
   group = obsidian_sync,
   pattern = "*.md",
   callback = function()
-    if is_obsidian_note() and vim.bo.modified and vim.bo.buftype == "" then
+    local buf = vim.api.nvim_get_current_buf()
+    if obsidian_bufs[buf] and vim.bo[buf].modified and vim.bo[buf].buftype == "" then
       vim.cmd("silent! write")
     end
   end,
