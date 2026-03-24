@@ -60,11 +60,16 @@ local function save_buf(buf)
   vim.api.nvim_buf_call(buf, function()
     vim.cmd("noautocmd write")
   end)
-  -- Bump mtime so Obsidian's file watcher sees the change.
+  -- Bump mtime so Obsidian's file watcher sees the change, then
+  -- re-sync Neovim's internal timestamp so it doesn't warn about
+  -- the file being "modified outside of Vim" on the next :w.
   local path = vim.api.nvim_buf_get_name(buf)
   if path ~= "" then
     local now = vim.uv.hrtime() / 1e9
     vim.uv.fs_utime(path, now, now)
+    vim.api.nvim_buf_call(buf, function()
+      vim.cmd("silent! checktime")
+    end)
   end
 end
 
