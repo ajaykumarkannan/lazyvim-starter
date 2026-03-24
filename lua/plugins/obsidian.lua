@@ -1,12 +1,11 @@
 return {
-  "obsidian-nvim/obsidian.nvim",
+  "epwalsh/obsidian.nvim",
   version = "*", -- recommended, use latest release instead of latest commit
   lazy = true,
   ft = "markdown",
   ---@module 'obsidian'
-  ---@type obsidian.config
+  ---@type obsidian.config.ClientOpts
   opts = {
-    legacy_commands = false, -- will be removed in next major release
     workspaces = {
       {
         name = "work",
@@ -18,8 +17,7 @@ return {
       folder = "Periodic/Daily",
     },
 
-    -- disable_frontmatter is replaced by frontmatter.enabled in the new fork
-    frontmatter = { enabled = false },
+    disable_frontmatter = true,
 
     -- Disable the default <CR> smart_action (which follows links, toggles
     -- checkboxes, etc.) so it doesn't interfere with normal <CR> behavior.

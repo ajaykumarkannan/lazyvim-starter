@@ -10,15 +10,15 @@ vim.wo.foldlevel = 99 -- start with everything unfolded (except what we explicit
 
 -- Auto-fold YAML frontmatter (lines between opening and closing ---)
 vim.schedule(function()
-	local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
-	if #lines < 2 or lines[1] ~= "---" then
-		return
-	end
-	for i = 2, #lines do
-		if lines[i] == "---" then
-			-- Create a fold from line 1 to the closing ---
-			vim.cmd(string.format("1,%dfold", i))
-			break
-		end
-	end
+  local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+  if #lines < 2 or lines[1] ~= "---" then
+    return
+  end
+  for i = 2, #lines do
+    if lines[i] == "---" then
+      -- Create a fold from line 1 to the closing ---
+      vim.cmd(string.format("1,%dfold", i))
+      break
+    end
+  end
 end)

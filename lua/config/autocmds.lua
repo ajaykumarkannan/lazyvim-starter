@@ -36,7 +36,9 @@ vim.api.nvim_create_autocmd("User", {
 })
 
 -- Reload buffer when the file changes on disk (e.g. saved by Obsidian app).
-vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold" }, {
+-- Only check on focus/buffer enter (not CursorHold, which fires every
+-- 200ms with LazyVim's default updatetime and adds unnecessary disk I/O).
+vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter" }, {
   group = obsidian_sync,
   pattern = "*.md",
   callback = function()
@@ -47,13 +49,28 @@ vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold" }, {
 })
 
 -- Auto-save vault notes so changes flow back to the Obsidian app.
-vim.api.nvim_create_autocmd({ "FocusLost", "BufLeave", "InsertLeave", "TextChanged" }, {
+-- Debounced to avoid blocking the UI on rapid events.
+local save_timer = vim.uv.new_timer()
+
+local function save_buf(buf)
+  if vim.api.nvim_buf_is_valid(buf) and vim.bo[buf].modified and vim.bo[buf].buftype == "" then
+    vim.api.nvim_buf_call(buf, function()
+      vim.cmd("silent! noautocmd write")
+    end)
+  end
+end
+
+vim.api.nvim_create_autocmd({ "FocusLost", "BufLeave", "InsertLeave" }, {
   group = obsidian_sync,
   pattern = "*.md",
-  callback = function()
-    local buf = vim.api.nvim_get_current_buf()
-    if obsidian_bufs[buf] and vim.bo[buf].modified and vim.bo[buf].buftype == "" then
-      vim.cmd("silent! write")
+  callback = function(ev)
+    local buf = ev.buf
+    if not obsidian_bufs[buf] then
+      return
     end
+    save_timer:stop()
+    save_timer:start(200, 0, vim.schedule_wrap(function()
+      save_buf(buf)
+    end))
   end,
 })
