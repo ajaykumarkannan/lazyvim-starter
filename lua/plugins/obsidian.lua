@@ -24,6 +24,10 @@ return {
     callbacks = {
       enter_note = function(note)
         pcall(vim.keymap.del, "n", "<CR>", { buffer = true })
+        vim.api.nvim_exec_autocmds("User", { pattern = "ObsidianNoteEnter" })
+      end,
+      leave_note = function(note)
+        vim.api.nvim_exec_autocmds("User", { pattern = "ObsidianNoteLeave" })
       end,
     },
   },

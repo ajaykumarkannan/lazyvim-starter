@@ -49,14 +49,22 @@ vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter" }, {
 })
 
 -- Auto-save vault notes so changes flow back to the Obsidian app.
--- Debounced to avoid blocking the UI on rapid events.
+-- Uses `noautocmd` to avoid re-entrancy from BufWritePre hooks, then
+-- explicitly bumps the file's mtime so Obsidian's fs-watcher picks it up.
 local save_timer = vim.uv.new_timer()
 
 local function save_buf(buf)
-  if vim.api.nvim_buf_is_valid(buf) and vim.bo[buf].modified and vim.bo[buf].buftype == "" then
-    vim.api.nvim_buf_call(buf, function()
-      vim.cmd("silent! noautocmd write")
-    end)
+  if not vim.api.nvim_buf_is_valid(buf) or not vim.bo[buf].modified or vim.bo[buf].buftype ~= "" then
+    return
+  end
+  vim.api.nvim_buf_call(buf, function()
+    vim.cmd("noautocmd write")
+  end)
+  -- Bump mtime so Obsidian's file watcher sees the change.
+  local path = vim.api.nvim_buf_get_name(buf)
+  if path ~= "" then
+    local now = vim.uv.hrtime() / 1e9
+    vim.uv.fs_utime(path, now, now)
   end
 end
 
