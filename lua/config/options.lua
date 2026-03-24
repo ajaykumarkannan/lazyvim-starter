@@ -17,3 +17,6 @@ vim.keymap.set("n", "N", "Nzzzv", { desc = "Prev search result (centered)" })
 
 -- Scrolloff - keep 3 lines visible above/below cursor
 vim.opt.scrolloff = 3
+
+-- Disable snacks animation
+vim.g.snacks_animate = false
