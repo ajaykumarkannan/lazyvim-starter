@@ -1,7 +1,7 @@
 -- Custom plugins migrated from .vimrc
 return {
   -- Disable auto-pairs (LazyVim uses mini.pairs by default)
-  { "echasnovski/mini.pairs", enabled = false },
+  { "nvim/mini.pairs", enabled = false },
 
   -- Remove time/clock from the status bar
   {
