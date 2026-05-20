@@ -3,6 +3,8 @@ vim.bo.tabstop = 2
 vim.bo.shiftwidth = 2
 vim.bo.softtabstop = 2
 
+vim.wo.conceallevel = 2
+
 -- Use manual foldmethod so folds are created/removed explicitly with zf/zd
 vim.wo.foldmethod = "manual"
 vim.wo.foldenable = true

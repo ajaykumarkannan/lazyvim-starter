@@ -1,22 +1,36 @@
--- Autocmds are automatically loaded on the VeryLazy event
--- Default autocmds that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/autocmds.lua
---
--- Add any additional autocmds here
--- with `vim.api.nvim_create_autocmd`
---
--- Or remove existing autocmds by their group name (which is prefixed with `lazyvim_` for the defaults)
--- e.g. vim.api.nvim_del_augroup_by_name("lazyvim_wrap_spell")
+-- LLVM/TableGen file types
+vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+  pattern = "*.ll",
+  callback = function()
+    vim.bo.filetype = "llvm"
+  end,
+})
+vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+  pattern = "*.td",
+  callback = function()
+    vim.bo.filetype = "tablegen"
+  end,
+})
 
--- Obsidian vault sync: auto-reload and auto-save for vault notes so that
--- edits in the Obsidian app and Neovim stay in sync.
---
--- Uses the new obsidian-nvim/obsidian.nvim User autocmd events
--- (ObsidianNoteEnter / ObsidianNoteLeave) to track whether the current
--- buffer belongs to the vault, avoiding repeated get_client() calls.
+-- Strip trailing whitespace on save
+vim.api.nvim_create_autocmd("BufWritePre", {
+  pattern = "*",
+  callback = function()
+    local cursor = vim.api.nvim_win_get_cursor(0)
+    vim.cmd([[%s/\s\+$//e]])
+    pcall(vim.api.nvim_win_set_cursor, 0, cursor)
+  end,
+})
 
+-- Highlight on yank
+vim.api.nvim_create_autocmd("TextYankPost", {
+  callback = function()
+    vim.hl.on_yank()
+  end,
+})
+
+-- Obsidian vault sync
 local obsidian_sync = vim.api.nvim_create_augroup("ObsidianSync", { clear = true })
-
--- Track which buffers are obsidian notes via the plugin's own events.
 local obsidian_bufs = {}
 
 vim.api.nvim_create_autocmd("User", {
@@ -35,9 +49,6 @@ vim.api.nvim_create_autocmd("User", {
   end,
 })
 
--- Reload buffer when the file changes on disk (e.g. saved by Obsidian app).
--- Only check on focus/buffer enter (not CursorHold, which fires every
--- 200ms with LazyVim's default updatetime and adds unnecessary disk I/O).
 vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter" }, {
   group = obsidian_sync,
   pattern = "*.md",
@@ -48,9 +59,6 @@ vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter" }, {
   end,
 })
 
--- Auto-save vault notes so changes flow back to the Obsidian app.
--- Uses `noautocmd` to avoid re-entrancy from BufWritePre hooks, then
--- explicitly bumps the file's mtime so Obsidian's fs-watcher picks it up.
 local save_timer = vim.uv.new_timer()
 
 local function save_buf(buf)
@@ -60,9 +68,6 @@ local function save_buf(buf)
   vim.api.nvim_buf_call(buf, function()
     vim.cmd("noautocmd write")
   end)
-  -- Bump mtime so Obsidian's file watcher sees the change, then
-  -- re-sync Neovim's internal timestamp so it doesn't warn about
-  -- the file being "modified outside of Vim" on the next :w.
   local path = vim.api.nvim_buf_get_name(buf)
   if path ~= "" then
     local now = vim.uv.hrtime() / 1e9
