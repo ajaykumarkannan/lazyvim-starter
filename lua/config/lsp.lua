@@ -44,12 +44,8 @@ vim.lsp.config("lua_ls", {
   },
 })
 
--- Markdown Oxide (install via: cargo install markdown-oxide)
-vim.lsp.config("markdown_oxide", {})
-
 -- Enable LSP servers
 vim.lsp.enable("lua_ls")
-vim.lsp.enable("markdown_oxide")
 
 -- Auto-enable servers installed by mason-lspconfig
 vim.api.nvim_create_autocmd("User", {

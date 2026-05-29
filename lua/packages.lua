@@ -46,7 +46,7 @@ vim.pack.add({
   gh("folke/persistence.nvim"), -- auto-saves and restores sessions (open buffers, layout)
 
   -- Tools
-  gh("epwalsh/obsidian.nvim"), -- Obsidian vault integration: links, notes, daily notes
+  gh("obsidian-nvim/obsidian.nvim"), -- Obsidian vault integration: links, notes, daily notes
   gh("folke/sidekick.nvim"), -- embedded AI CLI panel (Claude, etc.)
   gh("rhysd/vim-llvm"), -- syntax highlighting for LLVM IR, tablegen, .mir files
 }, { confirm = false, load = true })
