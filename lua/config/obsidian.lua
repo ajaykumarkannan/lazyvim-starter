@@ -1,3 +1,8 @@
+local vault = vim.fn.expand("~/Documents/Obsidian_Vault")
+if vim.fn.isdirectory(vault) == 0 then
+  return
+end
+
 require("obsidian").setup({
   workspaces = {
     {
