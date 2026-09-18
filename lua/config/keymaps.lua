@@ -59,8 +59,8 @@ vim.keymap.set("n", "<leader>fh", function() require("snacks").picker.help() end
 vim.keymap.set("n", "<leader>fr", function() require("snacks").picker.recent() end, { desc = "Recent Files" })
 vim.keymap.set("n", "<leader>fw", function() require("snacks").picker.grep_word() end, { desc = "Grep Word" })
 
--- Snacks file explorer
-vim.keymap.set("n", "<leader>e", function() require("snacks").explorer() end, { desc = "File Explorer" })
+-- Snacks file picker
+vim.keymap.set("n", "<leader>e", function() require("snacks").picker.files() end, { desc = "Find Files" })
 
 -- Persistence (session)
 vim.keymap.set("n", "<leader>qs", function() require("persistence").load() end, { desc = "Restore Session" })
